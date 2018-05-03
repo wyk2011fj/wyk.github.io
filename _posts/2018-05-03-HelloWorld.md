@@ -2,8 +2,10 @@
 layout:         post
 title:          Hello World!
 subtitle:       新的开始，新的挑战
+card-image:     https://ww1.sinaimg.cn/mw690/906cb9dbly1fdoq1o4qe1j20q00d4qed
 date:           2018-05-03 21:30:00
 tags:           init
+post-card-type: image
 ---
 
 ## Hello World ！
