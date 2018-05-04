@@ -11,9 +11,8 @@ post-card-type: image
 
 突然想到整个博客，记录下自己生活、工作及学习上的心得和体会。
 <br/>
-无奈前端水平有限，果断Fork了下别人的代码，希望自己能一直坚持下去。
+无奈前端水平有限，果断Fork了下别人的代码，希望自己能一直坚持下去。（附赠女神壁纸一张）
 <br/>
-（附赠女神壁纸一张）
 For the shadow of lost knowledge at least protects you from many illusions.
 <br/>
 
