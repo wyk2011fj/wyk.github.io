@@ -18,6 +18,7 @@ post-card-type: image
 ![MacDown Screenshot](http://static.open-open.com/lib/uploadImg/20140521/20140521222449_182.jpg)
 
 ### Spill过程：
+
 Spill过程包括collect、sort、spill、merge等步骤，如图所示：
 
 ![MacDown Screenshot](http://static.open-open.com/lib/uploadImg/20140521/20140521222449_800.jpg)
