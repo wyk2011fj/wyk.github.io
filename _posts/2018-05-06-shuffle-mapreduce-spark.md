@@ -17,22 +17,22 @@ post-card-type: image
 
 ![MacDown Screenshot](http://static.open-open.com/lib/uploadImg/20140521/20140521222449_182.jpg)
 
-###Spill过程：
+### Spill过程：
 Spill过程包括collect、sort、spill、merge等步骤，如图所示：
 
 ![MacDown Screenshot](http://static.open-open.com/lib/uploadImg/20140521/20140521222449_800.jpg)
 
-####1.Collect
+#### 1.Collect
 每个Map任务不断地以对的形式把数据输出到在内存中构造的一个环形数据结构中,叫Kvbuffer,其中放置索引数据的区域叫Kvmeta。使用环形数据结构是为了更有效地使用内存空间，在内存中放置尽可能多的数据。
 
 Kvbuffer的大小虽然可以通过参数设置，但是随着数据量的增大，还是需要把数据从内存刷到磁盘上再接着往内存写数据，把Kvbuffer中的数据刷到磁盘上的过程就叫Spill。同时，关于Spill 触发的条件（如80%时候开始spill),需要结合map写入速度与Spill速度情况而定。
 
 Spill任务由Spill线程承担，Spill线程从Map任务接到“命令”之后就开始正式干活，干的活叫SortAndSpill。
 
-####2.Sort
+#### 2.Sort
 先把Kvbuffer中的数据按照partition值和key两个关键字升序排序，移动的只是索引数据，排序结果是Kvmeta中数据按照partition为单位聚集在一起，同一partition内的按照key有序。
 
-####3.Spill
+#### 3.Spill
 Spill线程为这次Spill过程创建一个磁盘文件：从所有的本地目录中轮训查找能存储这么大空间的目录，找到之后在其中创建一个类似于 “spill12.out”的文件。Spill线程根据排过序的Kvmeta挨个把partition的数据吐到这个文件中，直到把所有的partition遍历完。一个partition在文件中对应的数据也叫段(segment)。
 
 有一个三元组记录某个partition对应的数据在这个文件中的索引：起始位置、原始数据长度、压缩之后的数据长度。用以记录文件中每个partition的位置。并且以同样的方式在磁盘中找一个位置，在其中创建一个类似于“spill12.out.index”的文件，文件中不光存储了索引数据，还存储了crc32的校验数据。
@@ -43,22 +43,22 @@ Spill线程为这次Spill过程创建一个磁盘文件：从所有的本地目�
 
 Spill跟Map数据输出是同时进行的，且Map任务总要把输出的数据写到磁盘上，即使输出数据量很小在内存中全部能装得下，在最后也会把数据刷到磁盘上。
 
-####4.Merge
+#### 4.Merge
 Map任务如果输出数据量很大，可能会进行好几次Spill，out文件和Index文件会产生很多，这时候就需要进行Merge操作。
 
 从所有的本地目录上扫描得到产生的Spill文件，得到数据和索引信息。然后创建一个叫file.out的文件和一个叫file.out.Index的文件用来存储最终的输出和索引。
 
-####5.Copy
+#### 5.Copy
 Reduce 任务通过HTTP向各个Map任务拖取它所需要的数据。内存不足时候，会先写到磁盘。同时同一节点也会走HTTP。
 
 一般Reduce是一边copy一边sort，即copy和sort两个阶段是重叠而不是完全分开的。
 
 <hr>
 
-##Spark的Shuffle过程介绍
+## Spark的Shuffle过程介绍
 Spark丰富了任务类型，有些任务之间数据流转不需要通过Shuffle，但是有些任务之间还是需要通过Shuffle来传递数据，比如wide dependency的group by key。
 
-###Shuffle Writer
+### Shuffle Writer
 Spark中需要Shuffle输出的Map任务会为每个Reduce创建对应的bucket，Map产生的结果会根据设置的partitioner得到对应的bucketId，然后填充到相应的bucket中去。每个Map的输出结果可能包含所有的Reduce所需要的数据，所以每个Map会创建R个bucket（R是reduce的个数），M个Map总共会创建M*R个bucket。
 
 Map创建的bucket其实对应磁盘上的一个文件，Map的结果写到每个bucket中其实就是写到那个磁盘文件中，这个文件也被称为blockFile，这种方式一个问题就是Shuffle文件过多。
@@ -71,7 +71,7 @@ Map创建的bucket其实对应磁盘上的一个文件，Map的结果写到每�
 
 ![MacDown Screenshot](http://static.open-open.com/lib/uploadImg/20140521/20140521222450_728.jpg)
 
-###Shuffle Fetcher
+### Shuffle Fetcher
 Reduce去拖Map的输出数据，Spark提供了两套不同的拉取数据框架：通过socket连接去取数据；使用netty框架去取数据。对于在本节点的Map数据，Reduce直接去磁盘上读取而不再通过网络框架。
 
 Spark Map输出的数据没有经过排序，Spark Shuffle过来的数据也不会进行排序，Spark认为Shuffle过程中的排序不是必须的，强制地进行排序只会增加Shuffle的负担。Reduce拖过来的数据会放在一个HashMap中，HashMap中存储的也是对，key是Map输出的key，Map输出对应这个key的所有value组成HashMap的value。Spark将Shuffle取过来的每一个对插入或者更新到HashMap中，来一个处理一个。HashMap全部放在内存中。
@@ -80,7 +80,7 @@ Spark Map输出的数据没有经过排序，Spark Shuffle过来的数据也不�
 
 <hr>
 
-##MapReduce和Spark的Shuffle过程对比
+## MapReduce和Spark的Shuffle过程对比
 
                     | MapReduce        | Spark     |
 --------------------|------------------|-----------------------|
