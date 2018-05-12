@@ -78,9 +78,7 @@ Reduce去拖Map的输出数据，Spark提供了两套不同的拉取数据框架
 Spark Map输出的数据没有经过排序，Spark Shuffle过来的数据也不会进行排序，Spark认为Shuffle过程中的排序不是必须的，强制地进行排序只会增加Shuffle的负担。Reduce拖过来的数据会放在一个HashMap中，HashMap中存储的也是对，key是Map输出的key，Map输出对应这个key的所有value组成HashMap的value。Spark将Shuffle取过来的每一个对插入或者更新到HashMap中，来一个处理一个。HashMap全部放在内存中。
 
 但是当操作类似group by这样的操作时，key对应的value数据量一般很大。Spark意识到在处理数据规模远远大于内存空间时所带来的不足，引入了一个具有外部排序的方案。Shuffle过来的数据先放在内存中，当内存中存储的对超过1000并且内存使用超过70%时，判断节点上可用内存如果还足够，则把内存缓冲区大小翻倍，如果可用内存不再够了，则把内存中的对排序然后写到磁盘文件中。最后把内存缓冲区中的数据排序之后和那些磁盘文件组成一个最小堆，每次从最小堆中读取最小的数据，这个和MapReduce中的merge过程类似。
-
-<hr>
-
+<hr />
 ## MapReduce和Spark的Shuffle过程对比
 
 步骤  |  MapReduce | Spark 
