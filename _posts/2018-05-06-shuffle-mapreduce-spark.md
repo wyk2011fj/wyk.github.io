@@ -8,6 +8,8 @@ tags:           bigData
 post-card-type: image
 ---
 
+Spark 和 Hadoop一直是大数据离线计算的必经之路，自己在工作中也经常用到，所以学习一下原理还是很有必要的，不然碰到问题很容易一脸懵逼，其中感觉shuffle是两者的核心之一，故整理下，方便以后回顾。
+
 大数据的分布式计算框架目前使用的最多的就是hadoop的mapReduce和Spark，mapReducehe和Spark之间的最大区别是前者较偏向于离线处理，而后者重视实现性。
 
 <hr>
