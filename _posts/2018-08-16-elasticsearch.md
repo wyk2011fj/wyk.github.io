@@ -2,7 +2,7 @@
 layout:         post
 title:          Elasticsearch
 subtitle:       Elasticsearch基本原理
-card-image:     https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1535023062&di=8f3fc8a1456a878549e4384d60a6c626&imgtype=jpg&er=1&src=http%3A%2F%2Fjbcdn2.b0.upaiyun.com%2F2017%2F10%2Fc6cf4b2000277c64f55e00cf6d2f294f.png
+card-image:     https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1546687273694&di=6315e99afd153b5eadd0d3fc1e5eece6&imgtype=0&src=http%3A%2F%2Fwx1.sinaimg.cn%2Fcrop.0.0.2048.1150.1000%2F006qUms7gy1fccwuxi41ij31kw0w0dgv.jpg
 date:           2018-08-16 19:30:00
 tags:           bigDataSimple
 post-card-type: image
