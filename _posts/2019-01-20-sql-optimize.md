@@ -1,18 +1,18 @@
 ---
 layout:         post
-title:          关于SQL
-subtitle:       慢更一手我与SQL们的故事
+title:          SQL真香
+subtitle:       慢更一手SQL们的故事
 card-image:     https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1547989001558&di=9de99b3910502ff78189dbcb9545ecfb&imgtype=0&src=http%3A%2F%2Fwww.onekit.cn%2Fimages%2Fsql.png
 date:           2019-01-20 18:30:00
 tags:           bigDataDetail
 post-card-type: image
 ---
 
-其实，相信目前大多数公司实际处理数据（主要是离线数据），基本都还是用sql的方式居多，大数据量下用hive sql、spark sql等，在关系型数据库中包括oracle、mysql等也是用sql处理逻辑，所以，积累和完善一些sql优化或者问题处理的方法和技巧还是有必要的，先init一手，后续慢慢补充。
+感觉目前大多数公司实际处理数据（主要是离线数据），基本都还是用sql的方式居多，大数据量下用hive sql、spark sql等，在关系型数据库中包括oracle、mysql等也是用sql处理逻辑，所以，积累和完善一些sql优化或者问题处理的方法和技巧还是有必要的，先init一手，后续慢慢补充。
 
 ## 1.Hive SQL
 
-Hadoop应该是当前最流行的大数据处理工具了（没有之一的那种），单独写MapReduce任务的应该不多了，主要还是用的Hive SQL，所以如何让你的HQL跑的又快又稳是非常重要的。
+Hadoop应该是当前最流行的大数据处理工具了（没有之一的那种），单独写MapReduce任务的应该不多了，主要还是用的Hive SQL，所以如何让HQL跑的又快又稳是非常重要的。
 
 首先，说SQL之前，可以在表的结构上做文章，比如：
 
@@ -40,11 +40,13 @@ demo:
 
 增量表，优点不用多说，毕竟省存储资源约等于省钱；缺点是历史信息追溯不到，但是依旧好用到飞起，毕竟很多时候过去并不重要，从关系型数据库同步的话，比较关键的是增量字段要加索引；
 
-拉链表，弥补了增量表最大的不足，并且继承了增量表的优点，但是依旧有些许缺陷，频繁更新的表不适用；另外，对于表的使用者，尤其是非开发人员，存在一些理解上的弊端，这个的话，可以通过建视图的方式隐藏掉复杂逻辑，对外保持原来的使用模式就可以了；
+拉链表，弥补了增量表最大的不足，并且继承了增量表的优点，但是依旧有缺陷，频繁更新的表不适用；另外，对于表的使用者，尤其是非开发人员，存在一些理解上的弊端，这个的话，可以建视图的方式隐藏掉复杂逻辑，对外保持原来的使用模式；
 
-以上其实都是可以单独展开写成一篇博文的，无奈被标题所囚禁，尊重一手写标题时候的自己，单纯的从SQL运行的角度，继续我们的HQL之旅；
+以上其实都是可以单独展开写成一篇的，无奈被标题所囚禁，尊重一手写标题时候的自己，单纯的从SQL运行的角度，继续研究；
 
-说白了，就是HQL跑的贼慢，我们该怎么办；
+说白了，就是HQL跑的贼慢，要怎么办；
+
+首先，类似关系型数据库，可以用 explain 查看sql执行计划，将整个执行为多个Stage；不过，自己实际用的不多，HQL执行计划异常情况也不像Oracle那样频繁，以后再完善相关内容(...)；
 
 HQL本质上是MapReduce任务，一般map task从数据源获取数据，再经过shuffle操作到reduce端由reduce task进行操作，最终产出数据，这里各个阶段，各个步骤都是有可能拖慢整个任务的；
 
@@ -71,7 +73,7 @@ HQL本质上是MapReduce任务，一般map task从数据源获取数据，再经
       
     逻辑为：
     
-    （源码贴了会看？直接上干货）
+    （源码贴了会看？直接上干货!）
     
     分片大小：splitSize = max (minSize, min(goalSize, dfs.block.size))
     
@@ -110,7 +112,7 @@ HQL本质上是MapReduce任务，一般map task从数据源获取数据，再经
 
     3.Spark小文件合并
     
-    之前写过了：https://wyk2011fj.github.io/2018/11/spark-small-file/
+    之前写过干货：https://wyk2011fj.github.io/2018/11/spark-small-file/
     
     4.distribute by、sort by
     
@@ -227,9 +229,52 @@ demo:
     
 最后 union all 一手即可。
 
-#### reduce长尾
+#### Reduce长尾
 
+reduce端产生长尾的主要原因是key分布不均匀，导致有些reduce的Instance处理的数据明显偏多；
 
+一般出现在distinct操作中，数据无法在Map端的Shuffle阶段根据Group By先做一次聚合操作（combiner操作）,减少传输的数据量，而是将所有的数据都传输到Reduce端，当Key的数据分发不均匀时，就会导致Reduce端长尾；
+
+当多个Distinct同时出现在一段SQL代码中时，数据会被分发多次，不仅会造成数据膨胀N倍，也会把长尾现象放大N倍。
+
+Shuffle操作，之前水过一篇，还是很详细的：
+<https://wyk2011fj.github.io/2018/05/shuffle-mapreduce-spark/>
+
+解决思路：
+
+用其他写法，代替distinct操作，或者count(disitnct)操作；
+
+demo:
+
+原SQL：
+
+	select d1
+	    ,  d2
+	    ,  count(distinct case 
+	       when a is not null then b
+	       end) as b_distinct_cnt
+	from xxx
+	group by d1,d2
+	
+优化SQL：
+
+先将中间结果写进临时表：
+
+	create table tmp1
+	as
+	select d1,d2,b,
+	count( case when a is not null then b end ) as b_cnt
+	from xxx
+	group by d1, d1, b
+	
+再从临时表获取结果数据：
+
+	select d1,d2,
+	sum(case when b_cnt > 0 then 1 else 0 end) as b_distinct_cnt
+	from tmp1
+	group by d1,d2
+
+当有多个distinct时，道理也一样，拆成多张tmp表；
 
 ## 2.Oracle SQL
 
@@ -237,7 +282,7 @@ Oracle不用多说了，大大小小公司，反正不是Oracle就是MySql，别
 
 一般直接面向服务，故SQL性能就直接影响服务体验了，程序员必备技能，有备无患；
 
-最重要的，肯定首先是 分区 and 索引 ，这两个是优先考虑的，别的，等有空再扩展一手；
+最重要的，肯定首先是 分区 and 索引 ，这两个是优先考虑的，别的，等有空再完善起来；
 
 (...)
 
@@ -250,3 +295,5 @@ https://www.cnblogs.com/qiuhong10/p/7698277.html
 https://blog.csdn.net/kwu_ganymede/article/details/51365002
 https://blog.csdn.net/jthink_/article/details/38903775
 https://www.cnblogs.com/zlslch/p/6105143.html
+https://blog.csdn.net/longshenlmj/article/details/51569892
+《大数据之路-阿里巴巴大数据实践》
