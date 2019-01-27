@@ -31,33 +31,33 @@ post-card-type: image
       
       但是由于使用的是同事直接写好的模块，改新增函数相对比较麻烦，所以作为后手。
       
-     2.设想：降低spark并行度，即调节spark.sql.shuffle.partitions
+    2.设想：降低spark并行度，即调节spark.sql.shuffle.partitions
      
-       比如之前设置的为100，按理说应该生成的文件数为100；
-       但是由于业务比较特殊，采用的大量的union all，且union all在spark中属于窄依赖，
-       不会进行shuffle，所以导致最终会生成（union all数量+1）*100的文件数。
-       如有10个union all，会生成1100个小文件。
-       这样导致降低并行度为10之后，执行时长大大增加，且文件数依旧有110个，效果不理想。
+      比如之前设置的为100，按理说应该生成的文件数为100；
+      但是由于业务比较特殊，采用的大量的union all，且union all在spark中属于窄依赖，
+      不会进行shuffle，所以导致最终会生成（union all数量+1）*100的文件数。
+      如有10个union all，会生成1100个小文件。
+      这样导致降低并行度为10之后，执行时长大大增加，且文件数依旧有110个，效果不理想。
        
-      3.设想：新增一个并行度=1任务，专门合并小文件。
+    3.设想：新增一个并行度=1任务，专门合并小文件。
         
-        于是先将原来的任务数据写到一个临时分区（如tmp）；
-        再起一个类似于‘insert overwrite 目标表 select * from 临时分区’的任务（并行度为1）；
-        但是结果小文件数还是没有减少，略感疑惑；
-        经过多次测试及推测，原因为：‘select * from 临时分区’ 这个任务在spark中属于窄依赖；
-        （spark DAG中分为宽依赖和窄依赖，只有宽依赖会进行shuffle）；
-        故并行度shuffle，spark.sql.shuffle.partitions=1也就没有起到作用；
+      于是先将原来的任务数据写到一个临时分区（如tmp）；
+      再起一个类似于‘insert overwrite 目标表 select * from 临时分区’的任务（并行度为1）；
+      但是结果小文件数还是没有减少，略感疑惑；
+      经过多次测试及推测，原因为：‘select * from 临时分区’ 这个任务在spark中属于窄依赖；
+      （spark DAG中分为宽依赖和窄依赖，只有宽依赖会进行shuffle）；
+      故并行度shuffle，spark.sql.shuffle.partitions=1也就没有起到作用；
         
-       4.设想（基于3）：让合并小文件的任务进行shuffle，且并行度=1
+    4.设想（基于3）：让合并小文件的任务进行shuffle，且并行度=1
        
-         由于数据量本身不大，且字段不多，所以直接采用了group by（在spark中属于宽依赖）的方式；
-         类似于‘insert overwrite 目标表 select * from 临时分区 group by *’
-         ‘dfs -rmr 目标表/分区=tmp’先删除了原分区及临时分区目录，以免影响测试结果
-         （其实，insert overwrite是先删后增的逻辑，不会影响结果）
-         先运行原任务，写到tmp分区，‘dfs -count’查看文件数，1100个；
-         运行加上group by的临时任务（spark.sql.shuffle.partitions=1）；
-         查看结果目录，文件数=1，成功；
-         最后又加了个删除tmp分区的任务；
+      由于数据量本身不大，且字段不多，所以直接采用了group by（在spark中属于宽依赖）的方式；
+      类似于‘insert overwrite 目标表 select * from 临时分区 group by *’
+      ‘dfs -rmr 目标表/分区=tmp’先删除了原分区及临时分区目录，以免影响测试结果
+      （其实，insert overwrite是先删后增的逻辑，不会影响结果）
+      先运行原任务，写到tmp分区，‘dfs -count’查看文件数，1100个；
+      运行加上group by的临时任务（spark.sql.shuffle.partitions=1）；
+      查看结果目录，文件数=1，成功；
+      最后又加了个删除tmp分区的任务；
          
 ### 2.结论
 
