@@ -90,7 +90,7 @@ demo:
 
 ![MacDown Screenshot](/assets/images/2338511-ded389898a3537a3.png)
 
-可以看到，对于ntile函数，传入的参数n是指要切分成多少份，返回对应的序号，row_number()则是生成一列连续的序号，rank()与row_number()类似，只是对于数值相同的这一项会同时为相同的序号，下一个序号跳过，比如倒数第二列当中有出现4，4，6没有5；而dense_rank()则相反，会紧跟着下一个是紧接着的序号，比如4，4，5。后面三个类似，只是对于相同情况区分不同。
+可以看到，对于ntile函数，传入的参数n是指要切分成多少份，返回对应的序号(如果切片不均匀，默认增加第一个切片的分布)，row_number()则是生成一列连续的序号，rank()与row_number()类似，只是对于数值相同的这一项会同时为相同的序号，下一个序号跳过，比如倒数第二列当中有出现4，4，6没有5；而dense_rank()则相反，会紧跟着下一个是紧接着的序号，比如4，4，5。后面三个类似，只是对于相同情况区分不同。
 
 
 **lag,lead,first_value,last_value**
@@ -178,3 +178,11 @@ month, day换顺序结果：
 ![MacDown Screenshot](/assets/images/2338511-4a4f0ef85a3e4661.png)
 
 所以，关键字的顺序对rollup的结果也是有影响的。
+
+##### 3. hive 行列转换操作
+
+先参考下面链接，有空再整出来：
+
+<https://www.cnblogs.com/blogyuhan/p/9274784.html>
+
+##### 4. hive 常用字符串操作
