@@ -186,3 +186,75 @@ month, day换顺序结果：
 <https://www.cnblogs.com/blogyuhan/p/9274784.html>
 
 ##### 4. hive 常用字符串操作
+
+1.concat，concat_ws，collect_set，collect_list
+
+（参考列转行）
+
+    collect_set：collect_set(col)函数只接受基本数据类型，
+    主要作用是将某字段的值进行去重汇总，产生array类型字段。
+    
+    collect_list：与collect_set相似，不去重。
+
+	concat_ws：表示concat with separator,即有分隔符的字符串连接，
+	concat_ws(',',collect_set(key)) 用','来连接collect_set返回的array中的每个元素。
+
+	concat：可以连接一个或者多个字符串，select concat(‘11’,’22’,’33’，‘44’);//11223344
+	
+2.hive lateral view，explode
+
+(参考行转列)
+
+    explode：转化 array 为列
+    
+    demo:
+    goods_id  sale_info
+    1,2,3     aa
+    
+    select explode(split(goods_id,',')) as goods_id from test;
+    结果为： 
+	goods_id 
+	1		  
+	2		  
+	3		  
+	
+	lateral view：侧视图的意义是配合explode（或者其他的UDTF），
+	一个语句生成把单行数据拆解成多行后的数据结果集。
+	
+	demo:
+	select goods_id,sale_info from test 
+	LATERAL VIEW explode(split(goods_id,','))goods as goods_id;
+	结果为：
+	goods_id  sale_info
+	1		  aa
+	2		  aa
+	3		  aa
+	
+	其中，LATERAL VIEW explode(split(goods_id,','))goods相当于一个虚拟表，
+	与原表test笛卡尔积关联。
+	
+	
+	
+3.split
+
+    demo:
+    split('a,b,c,d',',') 结果为 ["a","b","c","d"]
+    split('a,b,c,d',',')[0] 结果为 a
+    split('192.168.0.1','\\.') 结果为 ["192","168","0","1"]
+    
+4.regexp_replace(字段,原字符,新字符)
+
+    name 
+    a123
+    a124
+    
+    regexp_replace(name,'a','') 
+    结果为： 
+    123
+    124
+    
+
+    
+
+
+
