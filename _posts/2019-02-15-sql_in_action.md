@@ -201,9 +201,22 @@ month, day换顺序结果：
 
 	concat：可以连接一个或者多个字符串，select concat(‘11’,’22’,’33’，‘44’);//11223344
 	
+	demo:
+	select user_id,
+	       concat_ws(',',collect_list(order_id)) as order_value 
+	from col_lie
+	group by user_id
+	
 2.hive lateral view，explode
 
 (参考行转列)
+    
+    demo:
+    select user_id,
+           order_value,
+           order_id
+	from lie_col
+	lateral view explode(split(order_value,',')) num as order_id
 
     explode：转化 array 为列
     
