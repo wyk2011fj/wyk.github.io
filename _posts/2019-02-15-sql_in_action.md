@@ -213,6 +213,46 @@ demo:
 	        cume_dist1=小于等于80的人数为6/总人数9=0.6666666666666666
 	        cume_dist2=大于等于80的人数为4/总人数9=0.4444444444444444
 	        cume_dist3=分区内小于等于80的人数为3/分区内总人数5=0.6
+	       
+**percent_rank**
+
+计算给定行的百分比排名。可以用来计算超过了百分之多少的人。
+
+(当前行的rank值-1)/(分组内的总行数-1)
+
+demo:
+
+	select studentid,departmentid,classid,math,
+	row_number() over(partition by departmentid,classid order by math) as row_number,
+	percent_rank() over(partition by departmentid,classid order by math) as percent_rank
+	from student_scores;
+
+	结果
+	studentid   departmentid    classid math    row_number  percent_rank
+	111         department1     class1  69      1           0.0
+	113         department1     class1  74      2           0.25
+	112         department1     class1  80      3           0.5
+	115         department1     class1  93      4           0.75
+	114         department1     class1  94      5           1.0
+	124         department1     class2  70      1           0.0
+	121         department1     class2  74      2           0.3333333333333333
+	123         department1     class2  78      3           0.6666666666666666
+	122         department1     class2  86      4           1.0
+	216         department2     class1  74      1           0.0
+	215         department2     class1  82      2           0.2
+	212         department2     class1  83      3           0.4
+	211         department2     class1  93      4           0.6
+	213         department2     class1  94      5           0.8
+	214         department2     class1  94      6           0.8
+	223         department2     class2  74      1           0.0
+	222         department2     class2  78      2           0.25
+	224         department2     class2  80      3           0.5
+	225         department2     class2  85      4           0.75
+	221         department2     class2  99      5           1.0
+
+	结果解释:
+	    studentid=115,percent_rank=(4-1)/(5-1)=0.75
+	    studentid=123,percent_rank=(3-1)/(4-1)=0.6666666666666666
 
 ##### 3. hive 行列转换操作
 
