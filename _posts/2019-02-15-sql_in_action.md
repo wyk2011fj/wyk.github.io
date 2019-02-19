@@ -187,7 +187,32 @@ month, day换顺序结果：
 
 demo:
 
-![MacDown Screenshot](/assets/images/1550585779279.jpg)
+	select studentId,math,departmentId,classId,
+	-- 统计小于等于当前分数的人数占总人数的比例
+	cume_dist() over(order by math) as cume_dist1,
+	-- 统计大于等于当前分数的人数占总人数的比例
+	cume_dist() over(order by math desc) as cume_dist2,
+	-- 统计分区内小于等于当前分数的人数占总人数的比例
+	cume_dist() over(partition by classId order by math) as cume_dist3
+	from student_scores where departmentId='department1';
+
+	结果
+	studentid   math    departmentid    classid cume_dist1              cume_dist2          cume_dist3
+	111         69      department1     class1  0.1111111111111111      1.0                 0.2
+	113         74      department1     class1  0.4444444444444444      0.7777777777777778  0.4
+	112         80      department1     class1  0.6666666666666666      0.4444444444444444  0.6
+	115         93      department1     class1  0.8888888888888888      0.2222222222222222  0.8
+	114         94      department1     class1  1.0                     0.1111111111111111  1.0
+	124         70      department1     class2  0.2222222222222222      0.8888888888888888  0.25
+	121         74      department1     class2  0.4444444444444444      0.7777777777777778  0.5
+	123         78      department1     class2  0.5555555555555556      0.5555555555555556  0.75
+	122         86      department1     class2  0.7777777777777778      0.3333333333333333  1.0
+
+	结果解释:
+	    第三行:
+	        cume_dist1=小于等于80的人数为6/总人数9=0.6666666666666666
+	        cume_dist2=大于等于80的人数为4/总人数9=0.4444444444444444
+	        cume_dist3=分区内小于等于80的人数为3/分区内总人数5=0.6
 
 ##### 3. hive 行列转换操作
 
