@@ -1,0 +1,16 @@
+window.KF5_SUPPORTBOX_BUTTON = {
+	version: 2,
+	show: 1,
+	is_mobile: 0,
+	btn_name: "体验反馈",
+	facade: "1",
+	icon: "5",
+	color: "#3A4B53",
+	text_color: "#FFFFFF",
+	position: "left",
+	vertical: 0,
+	has_aside: false,
+    lang: "zh_CN",
+    is_overdue:0,
+    autoLoadIframe:false
+};
