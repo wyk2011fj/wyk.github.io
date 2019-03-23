@@ -27,8 +27,15 @@ post-card-type: image
 	
 	3.hive.merge.mapfiles 
 	默认：true；
-	在Map-only的任务结束时合并小文件
-    
+	在Map-only的任务结束时合并小文件。
+	
+	4.hive.merge.mapredfiles 
+	默认：false
+	是否在Map-Reduce的任务结束时合并小文件。
+	
+	5.hive.exec.parallel 
+	默认：false
+	是否开启 map/reduce job的并发提交。 
     
     
     
