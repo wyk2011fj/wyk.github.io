@@ -36,6 +36,10 @@ post-card-type: image
 	5.hive.exec.parallel 
 	默认：false
 	是否开启 map/reduce job的并发提交。 
+	
+	6.hive.groupby.skewindata 
+	默认:false
+	决定 group by 操作是否支持倾斜的数据
     
     
     
