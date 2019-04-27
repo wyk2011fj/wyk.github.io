@@ -40,7 +40,7 @@ post-card-type: image
 
 最后来张两周年祝福照：
 
-![MacDown Screenshot](/assets/images/WechatIMG43.jpeg)
+![MacDown Screenshot](/assets/images/1556356799007.jpg)
 
 ### 新的征程
 
